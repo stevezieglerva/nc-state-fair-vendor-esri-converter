@@ -10,8 +10,7 @@ NC_STATE_FAIR_ESRI_VENDOR_URL = "https://www.ncmhtd.com/arcgis/rest/services/AG_
 
 def get_esri_json(url):
 	response = requests.get(url)
-	json_response = json.dumps(response.text)
-	return json_response
+	return response.json()
 
 
 def json_is_valid(input_json):
@@ -27,38 +26,41 @@ def json_is_valid(input_json):
 
 def convert_esri_json_to_csv(input_json):
 	csv_result = io.StringIO()
-	writer = csv.writer(csv_result, quoting=csv.QUOTE_NONNUMERIC)
+	writer = csv.writer(csv_result, quoting=csv.QUOTE_NONNUMERIC, lineterminator='\n')
 
 	count = 0
 	header = {}
 	header_list = []
 	for feature in input_json["features"]:
 		count = count + 1
-		print(count)
 		attributes = feature["attributes"]
 		geometry = feature["geometry"]
 		if count == 1:
 			header = sorted(attributes.keys())
 			header_list = list(header)
-			header_list.append("x")
 			header_list.append("y")
+			header_list.append("x")
 			writer.writerow(header_list)
 		values_list = []
 		for column in header:
 			values_list.append(attributes[column])
-		values_list.append(geometry["x"])
 		values_list.append(geometry["y"])
+		values_list.append(geometry["x"])
 		writer.writerow(values_list)	
 	return csv_result.getvalue()
 
 
 def main():
-	vendor_json = get_esri_json(NC_STATE_FAIR_ESRI_VENDOR_URL)
-	print("JSON Length:" + str(len(vendor_json)))
-	print("JSON start:" + vendor_json[0:50])
-	print(json.dumps(vendor_json, indent=3))
-	csv_results = convert_esri_json_to_csv(vendor_json)
-	print(csv_results)
+	response = get_esri_json(NC_STATE_FAIR_ESRI_VENDOR_URL)
+	print("JSON Length:" + str(len(response)))
+	print("JSON start:" + response["displayFieldName"])
+
+	vendor_json = response
+	if json_is_valid(vendor_json):
+		print("Feature count:" + str(len(vendor_json["features"])))
+		csv_results = convert_esri_json_to_csv(vendor_json)
+		with open("results.csv", "w") as f:  
+			f.write(csv_results)
 
 if __name__ == '__main__':
 	main()		

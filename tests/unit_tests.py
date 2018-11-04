@@ -153,7 +153,7 @@ SINGLE_FEATURE_JSON = {
 
 NO_DISPLAY_NAME = {}
 
-NO_FEATURES = {"displayName" = "ziegler", "features" = []}
+NO_FEATURES = {"displayFieldName" : "ziegler", "features" : []}
 
 
 class TestMethods(unittest.TestCase):
@@ -235,7 +235,7 @@ class TestMethods(unittest.TestCase):
 
 		# Assert
 		self.assertTrue("\"null\",\"null\",\"Davis Concessions\",\"20 X 29\"" in first_row)
-		self.assertTrue("\"\",-78.71098,35.795005" in first_row)
+		self.assertTrue("\"\",35.795005,-78.71098" in first_row)
 		print(result)
 
 
